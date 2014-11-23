@@ -11,4 +11,8 @@
 
     <string name="date_picker_title">Date of crime:</string>
 
+    <string name="change_date_or_time">Select which to change:</string>
+    <string name="change_date">Date</string>
+    <string name="change_time">Time</string>
+
 </resources>

@@ -24,8 +24,8 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "com.dare599z.criminalintent.crime_id";
-    private static final String DIALOG_DATE = "date";
-    private static final int REQUEST_DATE = 0;
+    private static final String DIALOG_DATE = "date", DIALOG_TIME = "time", DIALOG_WHAT = "whattochange";
+    private static final int REQUEST_DATE = 0, REQUEST_TIME = 1, REQUEST_WHATTOCHANGE = 2;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -39,10 +39,30 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        if (requestCode == REQUEST_DATE) {
+        if (requestCode == REQUEST_DATE | requestCode == REQUEST_TIME) {
             Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
             updateDate();
+        }
+
+        if (requestCode == REQUEST_WHATTOCHANGE) {
+            int whatToChange = (int)data.getIntExtra(DateTimePickerFragment.EXTRA_TYPE, -1);
+            if (whatToChange == -1) {
+                // create toast
+                return;
+            }
+            if (whatToChange == DateTimePickerFragment.EXTRA_DATE) {
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+                dialog.show(fm, DIALOG_DATE);
+            } else if (whatToChange == DateTimePickerFragment.EXTRA_TIME) {
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+                dialog.show(fm, DIALOG_TIME);
+            }
+
         }
     }
 
@@ -93,9 +113,9 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-                dialog.show(fm, DIALOG_DATE);
+                DateTimePickerFragment dialog = new DateTimePickerFragment();
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_WHATTOCHANGE);
+                dialog.show(fm, DIALOG_WHAT);
             }
         });
 
