@@ -30,8 +30,6 @@ public class CrimeListFragment extends ListFragment {
     private static final String TAG = "CrimeListFragment";
     private boolean mSubtitleVisible;
 
-    blah fasdf
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
