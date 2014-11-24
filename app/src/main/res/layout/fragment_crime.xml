@@ -23,28 +23,39 @@
         android:text="@string/crime_details_label"
         style="?android:listSeparatorTextViewStyle" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/crime_date" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/crime_solved"
         android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp" >
+        android:layout_marginRight="16dp"
+        android:text="@string/crime_solved_label"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/crime_date"
-            android:layout_weight="1" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-        <CheckBox
-            android:layout_width="wrap_content"
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="2"/>
+
+        <Button android:id="@+id/deleteCrimeButton"
+            android:text="@string/delete_crime"
+            android:background="@android:color/holo_red_light"
+            android:padding="4dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/crime_solved"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:text="@string/crime_solved_label"
             android:layout_weight="1"/>
-
         </LinearLayout>
+
+
 
 
 

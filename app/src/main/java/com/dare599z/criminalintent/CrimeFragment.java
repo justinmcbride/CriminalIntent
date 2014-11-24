@@ -1,6 +1,9 @@
 package com.dare599z.criminalintent;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +36,7 @@ public class CrimeFragment extends Fragment {
 
     private Crime mCrime;
     private EditText mTitleField;
-    private Button mDateButton;
+    private Button mDateButton, mDeleteButton;
     private CheckBox mSolvedCheckBox;
 
     private void updateDate() {
@@ -153,6 +157,30 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mDeleteButton = (Button)v.findViewById(R.id.deleteCrimeButton);
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkForDelete();
+            }
+        });
+
         return v;
+    }
+
+    private void checkForDelete() {
+        Dialog deleteDialog = new AlertDialog.Builder(getActivity())
+                .setMessage("Are you sure you want to delete this crime?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CrimeLab.get(getActivity()).deleteCrime(mCrime);
+                        NavUtils.navigateUpFromSameTask(getActivity());
+
+                    }
+                })
+                .setNegativeButton("No", null)
+                .create();
+        deleteDialog.show();
     }
 }
