@@ -5,7 +5,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
@@ -20,8 +24,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,15 +41,24 @@ public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "com.dare599z.criminalintent.crime_id";
     private static final String DIALOG_DATE = "date", DIALOG_TIME = "time", DIALOG_WHAT = "whattochange";
-    private static final int REQUEST_DATE = 0, REQUEST_TIME = 1, REQUEST_WHATTOCHANGE = 2;
+    private static final int REQUEST_DATE = 0, REQUEST_TIME = 1, REQUEST_WHATTOCHANGE = 2, REQUEST_PHOTO = 3;
 
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton, mDeleteButton;
+    private ImageButton mPhotoButton;
     private CheckBox mSolvedCheckBox;
+    private ImageView mImageView;
+    private String mCurrentPhotoPath;
 
     private void updateDate() {
         mDateButton.setText(mCrime.getFormattedDate());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showPhoto();
     }
 
     @Override
@@ -71,6 +89,18 @@ public class CrimeFragment extends Fragment {
             }
 
         }
+
+        else if (requestCode == REQUEST_PHOTO) {
+            Photo p = new Photo(mCurrentPhotoPath);
+            mCrime.setPhoto(p);
+
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            mImageView.setImageBitmap(imageBitmap);
+
+            mCrime.setThumb(imageBitmap);
+            showPhoto();
+        }
     }
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -80,6 +110,12 @@ public class CrimeFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    private void showPhoto() {
+        if (mCrime.getThumb() != null) {
+            mImageView.setImageBitmap(mCrime.getThumb());
+        }
     }
 
     @Override
@@ -165,7 +201,51 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mPhotoButton = (ImageButton)v.findViewById(R.id.crime_imageButton);
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Ensure that there's a camera activity to handle the intent
+                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    // Create the File where the photo should go
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                Uri.fromFile(photoFile));
+                        startActivityForResult(takePictureIntent, REQUEST_PHOTO);
+                    }
+                }
+            }
+        });
+
+        mImageView = (ImageView)v.findViewById(R.id.crime_ImageView);
+
         return v;
+    }
+
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     private void checkForDelete() {

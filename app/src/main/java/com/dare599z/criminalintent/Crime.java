@@ -1,8 +1,13 @@
 package com.dare599z.criminalintent;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -15,11 +20,24 @@ public class Crime {
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
+    private Photo mPhoto;
+
+    public Bitmap getThumb() {
+        return mThumb;
+    }
+
+    public void setThumb(Bitmap mThumb) {
+        this.mThumb = mThumb;
+    }
+
+    private Bitmap mThumb;
 
     private static final String JSON_ID = "id";
     private static final String JSON_TITLE = "title";
     private static final String JSON_SOLVED = "solved";
     private static final String JSON_DATE = "date";
+    private static final String JSON_PHOTO = "photo";
+    private static final String JSON_THUMB = "thumb";
 
     public Date getDate() {
         return mDate;
@@ -67,6 +85,15 @@ public class Crime {
         }
         mSolved = json.getBoolean(JSON_SOLVED);
         mDate = new Date(json.getLong(JSON_DATE));
+        if (json.has(JSON_PHOTO)) {
+            mPhoto = new Photo(json.getJSONObject(JSON_PHOTO));
+        }
+        if (json.has(JSON_THUMB)) {
+            String encodedImage = json.getString(JSON_THUMB);
+            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            mThumb = decodedByte;
+        }
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -75,7 +102,23 @@ public class Crime {
         json.put(JSON_TITLE, mTitle);
         json.put(JSON_SOLVED, mSolved);
         json.put(JSON_DATE, mDate.getTime());
+        if (mPhoto != null) json.put(JSON_PHOTO, mPhoto.toJSON());
+        if (mThumb != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            mThumb.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageBytes = baos.toByteArray();
+            String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+            json.put(JSON_THUMB, encodedImage);
+        }
         return json;
+    }
+
+    public Photo getPhoto() {
+        return mPhoto;
+    }
+
+    public void setPhoto(Photo p) {
+        mPhoto = p;
     }
 
 }
