@@ -2,6 +2,7 @@ package com.dare599z.criminalintent;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -36,6 +37,10 @@ public class CrimeLab {
         mCrimes.add(c);
     }
 
+    public void deleteCrime(Crime c) {
+        mCrimes.remove(c);
+    }
+
     public static CrimeLab get(Context c) {
         if (mCrimeLab == null) {
             mCrimeLab = new CrimeLab(c.getApplicationContext());
@@ -58,10 +63,12 @@ public class CrimeLab {
     public boolean saveCrimes() {
         try {
             mSerial.saveCrimes(mCrimes);
+            Toast.makeText(mAppContext, "saved good", Toast.LENGTH_LONG);
             Log.d(TAG, "crimes saved");
             return true;
         } catch (Exception e) {
             Log.e(TAG, "error saving crimes: ", e);
+            Toast.makeText(mAppContext, "saved bad: " + e.toString(), Toast.LENGTH_LONG);
             return false;
         }
     }
