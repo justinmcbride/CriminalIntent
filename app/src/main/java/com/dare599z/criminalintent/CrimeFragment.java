@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -73,7 +75,7 @@ public class CrimeFragment extends Fragment {
         if (requestCode == REQUEST_WHATTOCHANGE) {
             int whatToChange = (int)data.getIntExtra(DateTimePickerFragment.EXTRA_TYPE, -1);
             if (whatToChange == -1) {
-                Toast.makeText(getActivity().getApplicationContext(), "Error: Date or time not selected", Toast.LENGTH_SHORT);
+                Toast.makeText(getActivity().getApplicationContext(), "Error: Date or time not selected", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (whatToChange == DateTimePickerFragment.EXTRA_DATE) {
@@ -91,17 +93,17 @@ public class CrimeFragment extends Fragment {
         }
 
         else if (requestCode == REQUEST_PHOTO) {
-            Photo p = new Photo(mCurrentPhotoPath);
+            if (mCurrentPhotoPath == null) {
+                Toast.makeText(getActivity(),"path not saved", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String path = mCurrentPhotoPath.substring(6);
+            Photo p = new Photo(path);
             mCrime.setPhoto(p);
-
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mImageView.setImageBitmap(imageBitmap);
-
-            mCrime.setThumb(imageBitmap);
             showPhoto();
         }
     }
+
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -113,8 +115,21 @@ public class CrimeFragment extends Fragment {
     }
 
     private void showPhoto() {
-        if (mCrime.getThumb() != null) {
-            mImageView.setImageBitmap(mCrime.getThumb());
+        Photo p = mCrime.getPhoto();
+        if (p != null) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            // Set height and width in options, does not return an image and no resource taken
+            BitmapFactory.decodeFile(p.getFilename(), options);
+
+            int pow = 0;
+            while (options.outHeight >> pow > 4096 || options.outWidth >> pow > 4096)
+                pow += 1;
+            options.inSampleSize = 1 << pow;
+            options.inJustDecodeBounds = false;
+            Bitmap image = BitmapFactory.decodeFile(p.getFilename(), options);
+            mImageView.setImageBitmap(image);
         }
     }
 
@@ -125,6 +140,9 @@ public class CrimeFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        if (savedInstanceState != null && (savedInstanceState.getSerializable("mCurrentPhoto") != null)) {
+            mCurrentPhotoPath = (String)savedInstanceState.getSerializable("mCurrentPhoto");
+        }
     }
 
     @Override
@@ -145,6 +163,12 @@ public class CrimeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         CrimeLab.get(getActivity()).saveCrimes();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putSerializable("mCurrentPhoto", mCurrentPhotoPath);
     }
 
     @Override

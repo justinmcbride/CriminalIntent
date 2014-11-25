@@ -22,22 +22,11 @@ public class Crime {
     private boolean mSolved;
     private Photo mPhoto;
 
-    public Bitmap getThumb() {
-        return mThumb;
-    }
-
-    public void setThumb(Bitmap mThumb) {
-        this.mThumb = mThumb;
-    }
-
-    private Bitmap mThumb;
-
     private static final String JSON_ID = "id";
     private static final String JSON_TITLE = "title";
     private static final String JSON_SOLVED = "solved";
     private static final String JSON_DATE = "date";
     private static final String JSON_PHOTO = "photo";
-    private static final String JSON_THUMB = "thumb";
 
     public Date getDate() {
         return mDate;
@@ -88,12 +77,6 @@ public class Crime {
         if (json.has(JSON_PHOTO)) {
             mPhoto = new Photo(json.getJSONObject(JSON_PHOTO));
         }
-        if (json.has(JSON_THUMB)) {
-            String encodedImage = json.getString(JSON_THUMB);
-            byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            mThumb = decodedByte;
-        }
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -103,13 +86,6 @@ public class Crime {
         json.put(JSON_SOLVED, mSolved);
         json.put(JSON_DATE, mDate.getTime());
         if (mPhoto != null) json.put(JSON_PHOTO, mPhoto.toJSON());
-        if (mThumb != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            mThumb.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageBytes = baos.toByteArray();
-            String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-            json.put(JSON_THUMB, encodedImage);
-        }
         return json;
     }
 

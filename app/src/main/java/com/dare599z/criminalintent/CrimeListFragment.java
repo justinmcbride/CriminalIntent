@@ -2,6 +2,7 @@ package com.dare599z.criminalintent;
 
 import android.app.ListFragment;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
@@ -42,6 +43,8 @@ public class CrimeListFragment extends ListFragment {
         CrimeAdapter adapter = new CrimeAdapter(mCrimes);
         setListAdapter(adapter);
     }
+
+
 
     @Override
     public void onResume() {
@@ -131,6 +134,7 @@ public class CrimeListFragment extends ListFragment {
                         }
                         mode.finish();
                         adapter.notifyDataSetChanged();
+                        CrimeLab.get(getActivity()).saveCrimes();
                         return true;
                     default:
                         return false;
@@ -155,11 +159,6 @@ public class CrimeListFragment extends ListFragment {
         startActivity(i);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        CrimeLab.get(getActivity()).saveCrimes();
-    }
 
     private class CrimeAdapter extends ArrayAdapter<Crime> {
         public CrimeAdapter(ArrayList<Crime> crimes) {

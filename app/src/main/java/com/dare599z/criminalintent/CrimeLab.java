@@ -63,12 +63,12 @@ public class CrimeLab {
     public boolean saveCrimes() {
         try {
             mSerial.saveCrimes(mCrimes);
-            Toast.makeText(mAppContext, "saved good", Toast.LENGTH_LONG);
+            Toast.makeText(mAppContext, "saved good", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "crimes saved");
             return true;
         } catch (Exception e) {
             Log.e(TAG, "error saving crimes: ", e);
-            Toast.makeText(mAppContext, "saved bad: " + e.toString(), Toast.LENGTH_LONG);
+            Toast.makeText(mAppContext, "saved bad: " + e.toString(), Toast.LENGTH_SHORT).show();
             return false;
         }
     }
