@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -77,6 +78,15 @@ public class Crime {
         if (json.has(JSON_PHOTO)) {
             mPhoto = new Photo(json.getJSONObject(JSON_PHOTO));
         }
+    }
+
+    public boolean deletePhoto() {
+        if (mPhoto != null) {
+            File file = new File(mPhoto.getFilename());
+            boolean deleted = file.delete();
+            return deleted;
+        }
+        return false;
     }
 
     public JSONObject toJSON() throws JSONException {

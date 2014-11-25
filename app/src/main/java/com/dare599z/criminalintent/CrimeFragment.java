@@ -18,6 +18,7 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -72,7 +73,7 @@ public class CrimeFragment extends Fragment {
             updateDate();
         }
 
-        if (requestCode == REQUEST_WHATTOCHANGE) {
+        else if (requestCode == REQUEST_WHATTOCHANGE) {
             int whatToChange = (int)data.getIntExtra(DateTimePickerFragment.EXTRA_TYPE, -1);
             if (whatToChange == -1) {
                 Toast.makeText(getActivity().getApplicationContext(), "Error: Date or time not selected", Toast.LENGTH_SHORT).show();
@@ -99,6 +100,16 @@ public class CrimeFragment extends Fragment {
             }
             String path = mCurrentPhotoPath.substring(6);
             Photo p = new Photo(path);
+
+            if (mCrime.getPhoto() != null) {
+                boolean deleted = mCrime.deletePhoto();
+                if (deleted) {
+                    Toast.makeText(getActivity(), "old file deleted", Toast.LENGTH_SHORT).show();
+                    mImageView.setImageResource(android.R.color.darker_gray);
+                }
+                else Toast.makeText(getActivity(), "old file NOT deleted", Toast.LENGTH_SHORT).show();
+            }
+
             mCrime.setPhoto(p);
             showPhoto();
         }
@@ -249,12 +260,39 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mImageView = (ImageView)v.findViewById(R.id.crime_ImageView);
 
+        mImageView = (ImageView)v.findViewById(R.id.crime_ImageView);
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Photo p = mCrime.getPhoto();
+                if (p==null) return;
+
+                Intent intent = new Intent();
+                intent.setAction(android.content.Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(new File(p.getFilename())), "image/jpg");
+                startActivity(intent);
+            }
+        });
+        registerForContextMenu(mImageView);
         return v;
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getActivity().getMenuInflater().inflate(R.menu.crime_photo_context, menu);
+    }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_crime_photo:
+                mCrime.deletePhoto();
+                mImageView.setImageResource(android.R.color.darker_gray);
+                return true;
+        }
+        return super.onContextItemSelected(item);
+    }
 
     private File createImageFile() throws IOException {
         // Create an image file name

@@ -21,5 +21,6 @@
     <string name="hide_subtitle">Hide Subtitle</string>
     <string name="subtitle">If you see something, say something</string>
     <string name="delete_crime">Delete</string>
+    <string name="delete_photo">Delete photo</string>
 
 </resources>
